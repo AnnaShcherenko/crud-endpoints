@@ -1,0 +1,11 @@
+{% extends "layout.html" %}
+
+{% block body %} 
+    <div class="leftcorner">
+        <h1>Customer {{customer.firstname}} {{customer.secondname}} has following details:</h1>
+        {% for detail in customer %}
+            <p>detail</p>
+        {% endfor %}
+    </div> 
+{% endblock %}
+        

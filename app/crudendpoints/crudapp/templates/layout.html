@@ -1,0 +1,37 @@
+{% load static %}
+
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <link href="{% static 'styles.css' %}" rel="stylesheet">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+        <title>{% block title %}Customer Manager{% endblock %}</title>
+    </head>
+    <body>
+        <div class="header">
+            <h1>Customer Management System</h1>
+        </div>
+        <div class="split left">
+            <div class="leftcorner">
+                <h1 class="headerA">Website navigation:</h1>
+                <ul>
+                    <div class="omis">
+                        <a href="{% url 'homepage' %}" class="listactions">Homepage</a>
+                    </div>
+                    <div class="omis">
+                        <a class="listactions">List Customers</a>
+                    </div> 
+                    <div class="omis">
+                        <a href="{% url 'create_customer' %}" class="listactions">Create Customer</a>
+                    </div>
+                </ul>
+            </div>
+        </div>
+        <div class="split right">
+            {% block body %}
+            {% endblock %}
+        </div>
+    </body>
+</html>
