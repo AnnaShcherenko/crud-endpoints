@@ -6,7 +6,8 @@ from rest_framework.test import APIRequestFactory
 from rest_framework.response import Response
 from rest_framework import status
 from django.urls import reverse
-from ..views import homepage, CreateCustomerView
+from ..models import Customer
+from ..views import homepage, CreateCustomerView, get_list
 
 client = Client()
 
@@ -70,3 +71,17 @@ class CreateCustomerViewTestCase(APITestCase):
             response.data["message"],
             "Customer was not created, input valid data!",
         )
+
+
+
+class GetListViewTestCase(APITestCase):
+    def test_get_list(self):
+        url = reverse('customers_list')
+        
+        Customer.objects.create(firstname='John', lastname='Doe', birth='1990-01-01', sex='MALE')
+        Customer.objects.create(firstname='Jane', lastname='Smith', birth='1992-05-15', sex='FEMALE')
+        
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTemplateUsed(response, 'listcustomers.html')
+        self.assertEqual(len(response.data['customers']), 2)

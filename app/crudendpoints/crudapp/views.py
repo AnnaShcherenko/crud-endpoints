@@ -16,6 +16,14 @@ def homepage(request) -> Response:
     return Response(template_name="homepage.html")
 
 
+@api_view(["GET"])
+@renderer_classes([TemplateHTMLRenderer])
+def get_list(request) -> Response:
+    """View represents GET endpoint"""
+    customers = Customer.objects.all()
+    return Response({'customers': customers},template_name="listcustomers.html")
+
+
 class CreateCustomerView(APIView):
     renderer_classes = [TemplateHTMLRenderer]
     template_name = "create.html"
