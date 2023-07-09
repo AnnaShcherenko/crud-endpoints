@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+{% load rest_framework %}
+
+{% block body %} 
+    <div class="leftcorner_c">
+        <h1 class="headerA">Please, fill the form:</h1>
+        <div class="form-container">
+            <form action="{% url 'update_customer' customer.id %}" method="POST" novalidate>
+                {% csrf_token %}
+                <div class="form-container">{% render_form serializers template_pack='rest_framework/vertical'%}</div>
+                <button type="submit" class="btn btn-default" onsubmit="return confirm('Are you sure you want to update this customer details?')">Update</button>
+            </form>
+        </div>
+    </div> 
+
+{% endblock %}
+        
