@@ -2,18 +2,16 @@
 {% load rest_framework %}
 
 {% block body %} 
-    <div class="leftcorner_c">
+    <div class="rightcorner">
         <h1 class="headerA">Please, fill the form:</h1>
-        <form action="{% url 'create_customer' %}" method="POST" novalidate>
-            {% csrf_token %}
-            <div class="row">
-                <div class=column>{% render_form form1 template_pack='rest_framework/vertical'%}</div>
-                <div class=column>{% render_form form2 template_pack='rest_framework/vertical'%}</div>
-                <div class=column>{% render_form form3 template_pack='rest_framework/vertical'%}</div>
-                <p></p>
-            </div>
-            <button type="submit" class="btn btn-default">Save</button>
-        </form>
+        <div class="form-container">
+            <form action="{% url 'create_customer' %}" method="POST" novalidate>
+                {% csrf_token %}
+                <div class="form-container">{% render_form serializers template_pack='rest_framework/vertical'%}</div>
+                <button type="submit" class="btn btn-default">Save</button>
+            </form>
+        </div>
     </div> 
+
 {% endblock %}
         

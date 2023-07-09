@@ -14,20 +14,18 @@ class Customer(models.Model):
 
 
 class EmailPhone(models.Model):
-    person = models.ForeignKey(
-        Customer, on_delete=models.CASCADE, related_name="customeremail", null=True
-    )
+    person = models.OneToOneField(Customer, on_delete=models.CASCADE, null=True)
     email = models.CharField(max_length=50)
     phone = models.CharField(max_length=20)
 
     def __str__(self) -> str:
-        return f"{self.person.firstname} {self.person.lastname} has added email {self.email} and phone number {self.phone}"
+        return (
+            f"{self.person} has added email {self.email} and phone number {self.phone}"
+        )
 
 
 class Address(models.Model):
-    person = models.ForeignKey(
-        Customer, on_delete=models.CASCADE, related_name="customeraddress", null=True
-    )
+    person = models.OneToOneField(Customer, on_delete=models.CASCADE, null=True)
     country = models.CharField(max_length=20)
     city = models.CharField(max_length=30)
     province = models.CharField(max_length=30, null=True, blank=True)
@@ -37,4 +35,4 @@ class Address(models.Model):
     flat = models.CharField(max_length=4, null=True, blank=True)
 
     def __str__(self) -> str:
-        return f"{self.person.firstname} {self.person.lastname} has added address"
+        return f"{self.person} has address {self.country}, {self.street}, {self.house}"

@@ -29,3 +29,9 @@ class AddressSerializer(serializers.ModelSerializer):
     class Meta:
         model = Address
         fields = ("country", "city", "province", "street", "postcode", "house", "flat")
+
+
+class CombinedSerializer(serializers.Serializer):
+    customer = CustomerSerializer()
+    contact = EmailPhoneSerializer()
+    address = AddressSerializer()

@@ -2,13 +2,19 @@ from django.shortcuts import render
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view, renderer_classes
 from rest_framework.response import Response
+from rest_framework import request
 from rest_framework.renderers import TemplateHTMLRenderer
 from rest_framework.views import APIView
+from .utils import get_from_db, save_models, upgrade_models
 from .models import Customer, EmailPhone, Address
-from .serializers import CustomerSerializer, EmailPhoneSerializer, AddressSerializer
+from .serializers import (
+    CustomerSerializer,
+    EmailPhoneSerializer,
+    AddressSerializer,
+    CombinedSerializer,
+)
 
 
-# Create your views here.
 @api_view(["GET"])
 @renderer_classes([TemplateHTMLRenderer])
 def homepage(request) -> Response:
@@ -18,7 +24,7 @@ def homepage(request) -> Response:
 
 @api_view(["GET"])
 @renderer_classes([TemplateHTMLRenderer])
-def get_list(request) -> Response:
+def get_list(request: request) -> Response:
     """View represents GET endpoint"""
     customers = Customer.objects.all()
     return Response({"customers": customers}, template_name="listcustomers.html")
@@ -26,14 +32,27 @@ def get_list(request) -> Response:
 
 @api_view(["GET"])
 @renderer_classes([TemplateHTMLRenderer])
-def get_customer(request, customer_id) -> Response:
+def get_customer(request: request, customer_id: int) -> Response:
     """View represents GET endpoint"""
-    customer = Customer.objects.get(id=customer_id)
-    contact = EmailPhone(person=customer)
-    address = Address(person=customer)
+    customer = get_from_db(request, customer_id)
+    contact = get_object_or_404(EmailPhone, person=customer).__dict__
+    address = get_object_or_404(Address, person=customer).__dict__
     return Response(
         {"customer": customer, "contact": contact, "address": address},
         template_name="customerdetail.html",
+    )
+
+
+@api_view(["DELETE", "POST"])
+@renderer_classes([TemplateHTMLRenderer])
+def delete_customer(request: request, customer_id: int) -> Response:
+    """View represents DELETE endpoint"""
+    customer = get_from_db(request, customer_id)
+    customer.delete()
+    return Response(
+        {"message": f"{customer} was successfully deleted!", "status": "success"},
+        status=200,
+        template_name="message.html",
     )
 
 
@@ -41,29 +60,63 @@ class CreateCustomerView(APIView):
     renderer_classes = [TemplateHTMLRenderer]
     template_name = "create.html"
 
-    def get(self, request):
-        form1 = CustomerSerializer()
-        form2 = EmailPhoneSerializer()
-        form3 = AddressSerializer()
-        return Response({"form1": form1, "form2": form2, "form3": form3})
+    def get(self, request: request) -> Response:
+        serializers = CombinedSerializer()
+        return Response({"serializers": serializers})
 
-    def post(self, request):
-        form1 = CustomerSerializer(data=request.data)
-        form2 = EmailPhoneSerializer(data=request.data)
-        form3 = AddressSerializer(data=request.data)
-        if form1.is_valid() and form2.is_valid() and form3.is_valid():
-            form1.save()
-            form2.save()
-            form3.save()
+    def post(self, request: request) -> Response:
+        serializers = CombinedSerializer(data=request.data)
+        print("/n/n/n----------> serializer", serializers)
+        if serializers.is_valid():
+            print("/n/n/n----------> valid")
+            save_models(serializers)
             return Response(
                 {"message": "Customer was successfully created!", "status": "success"},
+                status=200,
+                template_name="message.html",
+            )
+        return Response(
+            {
+                "message": "Customer was not created, input valid data!",
+                "status": "error",
+            },
+            status=400,
+            template_name="message.html",
+        )
+
+
+class UpdateCustomerView(APIView):
+    renderer_classes = [TemplateHTMLRenderer]
+    template_name = "update.html"
+
+    def get(self, request: request, customer_id: int) -> Response:
+        customer = get_from_db(request, customer_id)
+        contact = EmailPhone.objects.get(person=customer)
+        address = Address.objects.get(person=customer)
+
+        serializer = CombinedSerializer(
+            {"customer": customer, "contact": contact, "address": address}
+        )
+        return Response({"customer": customer, "serializers": serializer})
+
+    def post(self, request: request, customer_id: int) -> Response:
+        serializer = CombinedSerializer(
+            data=request.data,
+        )
+        if serializer.is_valid():
+            upgrade_models(serializer)
+            return Response(
+                {
+                    "message": "Customer details were successfully updated!",
+                    "status": "success",
+                },
                 status=200,
                 template_name="message.html",
             )
 
         return Response(
             {
-                "message": "Customer was not created, input valid data!",
+                "message": "Customer details were not updated, input valid data!",
                 "status": "error",
             },
             status=400,
