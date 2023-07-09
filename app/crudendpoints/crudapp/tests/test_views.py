@@ -19,7 +19,6 @@ class HomepageViewTestCase(TestCase):
     def test_homepage_view(self):
         request = self.factory.get("/")
         response = homepage(request)
-
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.template_name, "homepage.html")
 
@@ -42,7 +41,6 @@ class CreateCustomerViewTestCase(APITestCase):
             "house": "A",
             "flat": "1",
         }
-
         response = client.post(url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["message"], "Customer was successfully created!")
@@ -64,7 +62,6 @@ class CreateCustomerViewTestCase(APITestCase):
             "house": "A",
             "flat": "1",
         }
-
         response = client.post(url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
@@ -73,15 +70,27 @@ class CreateCustomerViewTestCase(APITestCase):
         )
 
 
-
 class GetListViewTestCase(APITestCase):
     def test_get_list(self):
-        url = reverse('customers_list')
-        
-        Customer.objects.create(firstname='John', lastname='Doe', birth='1990-01-01', sex='MALE')
-        Customer.objects.create(firstname='Jane', lastname='Smith', birth='1992-05-15', sex='FEMALE')
-        
+        url = reverse("customers_list")
+        Customer.objects.create(
+            firstname="John", lastname="Doe", birth="1990-01-01", sex="MALE"
+        )
+        Customer.objects.create(
+            firstname="Jane", lastname="Smith", birth="1992-05-15", sex="FEMALE"
+        )
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertTemplateUsed(response, 'listcustomers.html')
-        self.assertEqual(len(response.data['customers']), 2)
+        self.assertTemplateUsed(response, "listcustomers.html")
+        self.assertEqual(len(response.data["customers"]), 2)
+
+
+class GetCustomerViewTestCase(APITestCase):
+    def test_get_customer(self):
+        customer = Customer.objects.create(
+            firstname="John", lastname="Doe", birth="1990-01-01", sex="MALE"
+        )
+        url = reverse("customer_details", args=[customer.id])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTemplateUsed(response, "customerdetail.html")

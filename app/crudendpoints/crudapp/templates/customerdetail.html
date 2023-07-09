@@ -2,10 +2,21 @@
 
 {% block body %} 
     <div class="leftcorner">
-        <h1>Customer {{customer.firstname}} {{customer.secondname}} has following details:</h1>
-        {% for detail in customer %}
-            <p>detail</p>
-        {% endfor %}
+        <h1>Customer {{customer.firstname}} {{customer.lastname}} has following details:</h1>
+        <p>Date of Birth: {{ customer.birth }}</p>
+        <p>Sex: {{ customer.sex }}</p>
+        <p>Email: {{contact.email}}</p>
+        <p>Phone Number: {{ contact.phone }}</p>
+        <p>Country: {{ address.country }}</p>
+        <p>City: {{ address.city }}</p>
+        <p>Province: {{ address.province }}</p>
+        <p>Street: {{ address.street }}</p>
+        <p>Postcode: {{ address.postcode }}</p>
+        <p>House: {{ address.house }}</p>
+        <p>Flat: {{ address.flat }}</p>
+        <a href="{% url 'customers_list' %}">Back</a>
+        <a>Remove</a>
+        <a>Edit</a>
     </div> 
 {% endblock %}
         
