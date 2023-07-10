@@ -19,11 +19,24 @@ def get_from_db(request: request, customer_id: int) -> Customer:
         return Response(
             {
                 "message": "Customer doesn't exist!",
-                "status": "error",
+                "status": "error: 404",
             },
-            status=400,
+            status=404,
             template_name="message.html",
         )
+
+
+def specify_errors(serializer):
+    default_errors = serializer.errors
+    field_names = []
+    for subfield in default_errors.items():
+        if isinstance(subfield[1], dict):
+            for field_name, field_errors in subfield[1].items():
+                field_names.append(field_name)
+
+        elif isinstance(subfield[1], list):
+            field_names.extend(subfield[1])
+    return field_names
 
 
 def save_models(serializer):
@@ -43,27 +56,22 @@ def save_models(serializer):
     address_model.save()
 
 
-def upgrade_models(serializer):
+def upgrade_models(serializer, customer_id):
     validated_data = serializer.validated_data
-    customer_data = validated_data["customer"]
-    contact_data = validated_data["contact"]
-    address_data = validated_data["address"]
+    customer_data = validated_data.get("customer", {})
+    contact_data = validated_data.get("contact", {})
+    address_data = validated_data.get("address", {})
 
-    customer.firstname = customer_data.get("firstname", customer.firstname)
-    customer.lastname = customer_data.get("lastname", customer.lastname)
-    customer.birth = customer_data.get("birth", customer.birth)
-    customer.sex = customer_data.get("sex", customer.sex)
+    customer = get_from_db(request, customer_id)
+    contact = EmailPhone.objects.get(person=customer)
+    address = Address.objects.get(person=customer)
+
+    for key, value in customer_data.items():
+        setattr(customer, key, value)
     customer.save()
-
-    contact.email = contact_data.get("email", contact.email)
-    contact.phone = contact_data.get("phone", contact.phone)
+    for key, value in contact_data.items():
+        setattr(contact, key, value)
     contact.save()
-
-    address.country = address_data.get("country", address.country)
-    address.city = address_data.get("city", address.city)
-    address.province = address_data.get("province", address.province)
-    address.street = address_data.get("street", address.street)
-    address.postcode = address_data.get("postcode", address.postcode)
-    address.house = address_data.get("house", address.house)
-    address.flat = address_data.get("flat", address.flat)
+    for key, value in address_data.items():
+        setattr(address, key, value)
     address.save()

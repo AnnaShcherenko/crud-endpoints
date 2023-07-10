@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework import request
 from rest_framework.renderers import TemplateHTMLRenderer
 from rest_framework.views import APIView
-from .utils import get_from_db, save_models, upgrade_models
+from .utils import get_from_db, save_models, upgrade_models, specify_errors
 from .models import Customer, EmailPhone, Address
 from .serializers import (
     CustomerSerializer,
@@ -50,7 +50,7 @@ def delete_customer(request: request, customer_id: int) -> Response:
     customer = get_from_db(request, customer_id)
     customer.delete()
     return Response(
-        {"message": f"{customer} was successfully deleted!", "status": "success"},
+        {"message": f"{customer} was successfully deleted!", "status": "success: 200"},
         status=200,
         template_name="message.html",
     )
@@ -66,19 +66,18 @@ class CreateCustomerView(APIView):
 
     def post(self, request: request) -> Response:
         serializers = CombinedSerializer(data=request.data)
-        print("/n/n/n----------> serializer", serializers)
         if serializers.is_valid():
-            print("/n/n/n----------> valid")
             save_models(serializers)
             return Response(
                 {"message": "Customer was successfully created!", "status": "success"},
                 status=200,
                 template_name="message.html",
             )
+        field_names = specify_errors(serializers)
         return Response(
             {
-                "message": "Customer was not created, input valid data!",
-                "status": "error",
+                "message": f"Customer was not created, input valid data! Invalid data in {field_names}",
+                "status": "error: 400",
             },
             status=400,
             template_name="message.html",
@@ -100,24 +99,22 @@ class UpdateCustomerView(APIView):
         return Response({"customer": customer, "serializers": serializer})
 
     def post(self, request: request, customer_id: int) -> Response:
-        serializer = CombinedSerializer(
-            data=request.data,
-        )
+        serializer = CombinedSerializer(data=request.data)
         if serializer.is_valid():
-            upgrade_models(serializer)
+            upgrade_models(serializer, customer_id)
             return Response(
                 {
                     "message": "Customer details were successfully updated!",
-                    "status": "success",
+                    "status": "success: 200",
                 },
                 status=200,
                 template_name="message.html",
             )
-
+        field_names = specify_errors(serializer)
         return Response(
             {
-                "message": "Customer details were not updated, input valid data!",
-                "status": "error",
+                "message": f"Customer details were not updated, input valid data in {field_names}!",
+                "status": "error: 400",
             },
             status=400,
             template_name="message.html",

@@ -24,7 +24,7 @@ class CustomerModelTestCase(TestCase):
         self.assertEqual(email_phone.phone, "1234567890")
         self.assertEqual(
             str(email_phone),
-            "John Doe has added email john.doe@example.com and phone number 1234567890",
+            "John Doe customer has been created has added email john.doe@example.com and phone number 1234567890",
         )
 
     def test_address_creation(self):
@@ -46,4 +46,7 @@ class CustomerModelTestCase(TestCase):
         self.assertEqual(address.postcode, "12345")
         self.assertEqual(address.house, "1A")
         self.assertEqual(address.flat, "4")
-        self.assertEqual(str(address), "John Doe has added address")
+        self.assertEqual(
+            str(address),
+            "John Doe customer has been created has address USA, 123 Main St, 1A",
+        )
