@@ -12,6 +12,8 @@ Simple API to manage customers.
 
 - Since HTML does not support DELETE and PUT requests, they were done using POST request.
 
+- Unit tests were added to the project. To run the tests: python manage.py test
+
 
 ## Installation
 
